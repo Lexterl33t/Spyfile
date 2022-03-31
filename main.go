@@ -66,18 +66,21 @@ func main() {
 			}
 
 			atime := atime(f_n)
-			if atime != latest_updated {
+			if atime.Format("2006-01-02 15:04:05") != latest_updated.Format("2006-01-02 15:04:05") {
 				latest_updated = atime
 				if latest_size != f_n.Size() {
 					latest_size = f_n.Size()
 					ch <- Event{
-						Name: "WRITE",
+						Name: f.Name() + ": WRITE",
+					}
+					continue
+				} else if latest_size == f_n.Size() {
+					ch <- Event{
+						Name: f.Name() + ": OPENED",
 					}
 					continue
 				} else {
-					ch <- Event{
-						Name: "OPENED",
-					}
+					ch <- NoEvent{}
 					continue
 				}
 			} else {
@@ -98,11 +101,13 @@ func main() {
 					if err != nil {
 						log.Println(err)
 					}
+					continue
 				case Error:
 					err := beeep.Alert("Spyfile", evt.(Error).Error.Error(), "logo.jpg")
 					if err != nil {
 						log.Println(err)
 					}
+					continue
 				}
 			}
 		}
