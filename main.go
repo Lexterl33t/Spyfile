@@ -1,13 +1,13 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"syscall"
 	"time"
 
 	"github.com/gen2brain/beeep"
+	"github.com/gen2brain/dlgs"
 	_ "github.com/qodrorid/godaemon"
 )
 
@@ -33,9 +33,15 @@ func atime(fi os.FileInfo) time.Time {
 
 func main() {
 	args := os.Args
+	var file string
 	if len(args) < 2 {
-		fmt.Println("Usage:", args[0], "<file>")
-		return
+		file_innput, _, err := dlgs.File("Select file", "", false)
+		file = file_innput
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		file = args[1]
 	}
 
 	ch := make(chan any)
@@ -43,7 +49,7 @@ func main() {
 	go func() {
 		var latest_updated time.Time
 		var latest_size int64
-		f, err := os.Stat(args[1])
+		f, err := os.Stat(file)
 		if err != nil {
 			close(ch)
 			log.Println(err)
@@ -57,7 +63,7 @@ func main() {
 		latest_size = f.Size()
 		for {
 
-			f_n, err := os.Stat(args[1])
+			f_n, err := os.Stat(file)
 			if err != nil {
 				ch <- Error{
 					Error: err,
