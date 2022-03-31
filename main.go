@@ -68,15 +68,15 @@ func main() {
 			atime := atime(f_n)
 			if atime.Format("2006-01-02 15:04:05") != latest_updated.Format("2006-01-02 15:04:05") {
 				latest_updated = atime
-				if latest_size != f_n.Size() {
+				if latest_size == f_n.Size() {
+					ch <- Event{
+						Name: f.Name() + ": OPENED",
+					}
+					continue
+				} else if latest_size != f_n.Size() {
 					latest_size = f_n.Size()
 					ch <- Event{
 						Name: f.Name() + ": WRITE",
-					}
-					continue
-				} else if latest_size == f_n.Size() {
-					ch <- Event{
-						Name: f.Name() + ": OPENED",
 					}
 					continue
 				} else {
